@@ -1,0 +1,44 @@
+#!/system/bin/sh
+#Battery and Performance Tweaks
+#To select a tweak, remove the "#" before the setting
+#Optimal values for up_threshold is 45-85. Higher number=longer battery/lower performance. Lower number=higher performance/less battery life
+
+mount -o remount rw /system
+
+#=========
+#OnDemand
+#=========
+#AWAKE_GOVERNOR="ondemand"
+#SLEEP_GOVERNOR="ondemand"
+#	echo "70" > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/up_threshold;
+#	echo "70" > /sys/devices/system/cpu/cpufreq/ondemand/up_threshold;
+#===================================
+#0=off  1=on
+#===================================	
+#	echo "1" > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/powersave_bias;
+#	echo "1" > /sys/devices/system/cpu/cpufreq/ondemand/powersave_bias;
+#	echo "1" > /sys/devices/system/cpu/cpufreq/ondemand/io_is_busy;
+#===================================
+#Do not change smapling_rate values
+#===================================
+	echo "32500" > /sys/devices/system/cpu/cpu0/cpufreq/ondemand/sampling_rate;
+	echo "32500" > /sys/devices/system/cpu/cpufreq/ondemand/sampling_rate;
+
+SLEEP_GOVERNOR="powersave";
+
+#==================================================================================================
+#Set maximum & minimum frequency
+#==================================================================================================
+#chmod 666 /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq;
+#echo "1300000" > /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq;
+#chmod 666 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq;
+#echo "1300000" > /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq;
+
+echo "Setting Awake Governor";
+echo "Setting Sleep Governor";
+echo "Setting up_threshold";
+echo "Setting powersave_bias";
+echo "Setting io_is_busy";
+echo "Setting CPU Clock values";
+sleep 15
+echo "Done"

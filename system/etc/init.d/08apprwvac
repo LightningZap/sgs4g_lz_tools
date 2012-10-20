@@ -1,0 +1,91 @@
+#!/system/bin/sh
+#Sets RW Permissions for system apps
+
+mount -o remount rw /system
+
+logFile=/data/08apprwvac.log
+if [ -f $logFile ]; then
+    rm $logFile
+fi
+touch $logFile
+chmod 777 $logFile
+
+mount -o remount rw /sys
+echo "Setting permissions" >> $logFile
+    chmod 0771 /data/app/
+	
+echo "Setting permissions" >> $logFile
+	chmod 777 /system/app
+	chmod 777 /system/framework
+	chmod 777 /data/app
+
+        for file in /system/app/* /system/framework/* /data/app/*; do
+                echo "    setting permissions (666) for $file" >> $logFile
+                chmod 666 $file
+        done
+           
+        echo "chmodding init.d folder"
+        chmod 777 /system/etc/init.d
+        
+        for file in /system/etc/init.d/*; do
+                echo "    setting permissions (777) for $file" >> $logFile
+                chmod 777 $file
+        done
+echo "Permissions set" >> $logFile
+
+#=============================================================
+#Defrags database files and optimizes SQlite databases of apps
+#=============================================================
+
+mount -o remount rw /system
+mount -o remount rw /
+
+LOG_FILE=/data/vacuum_sqlite.log
+
+# do nothing if less than 5 days
+find $LOG_FILE -type f -mtime -5 -delete;
+
+echo "Ignore the 'database disk image is malformed' error";
+echo "Ignore the 'no such collation sequence' error";
+
+if ! test -f $LOG_FILE; then
+	if [ -e $LOG_FILE ]; then
+		rm $LOG_FILE;
+	fi;
+    	
+echo "Starting Sqlite Vacuum $( date +"%m-%d-%Y %H:%M:%S" )" | tee -a $LOG_FILE;
+sleep 5;
+echo "Cleaning /data partition";
+sleep 5;
+	for i in \
+	`find /data -iname "*.db"`
+	do \
+		/system/xbin/sqlite3 $i 'VACUUM;';
+		/system/xbin/sqlite3 $i 'REINDEX;'; 		
+		echo Vacuum $i  | tee -a $LOG_FILE;
+	done;
+sleep 5;
+echo "Cleaning /dbdata partition";
+sleep 5;
+	for i in \
+	`find /dbdata -iname "*.db"`
+	do \
+		/system/xbin/sqlite3 $i 'VACUUM;';
+		/system/xbin/sqlite3 $i 'REINDEX;';  
+		echo Vacuum $i  | tee -a $LOG_FILE;
+	done;
+sleep 5;
+echo "Cleaning /sdcard partition";
+sleep 5;
+	for i in \
+	`find /sdcard -iname "*.db"`
+	do \
+		/system/xbin/sqlite3 $i 'VACUUM;'; 
+		/system/xbin/sqlite3 $i 'REINDEX;'; 
+		echo Vacuum $i  | tee -a $LOG_FILE;
+	done
+
+	echo "Sqlite Vacuum finished at $( date +"%m-%d-%Y %H:%M:%S" )" | tee -a $LOG_FILE;
+fi
+
+echo "Complete"
